@@ -44,7 +44,7 @@ class program
                         string Color = Console.ReadLine();
                         
                         Console.WriteLine(" Who is the Manufacturer? ");
-                        string Manufacturer = Console.ReadLine():
+                        string Manufacturer = Console.ReadLine();
                         
                         Console.WriteLine(" What is the Quantity? ");
                         string Quantity = Console.ReadLine();
@@ -66,7 +66,7 @@ class program
 
 
 
-    static void SearchOrders(OrderDbConext context)
+    static void SearchOrders(OrderDbContext context)
     {
         bool searchExit = false;
 
@@ -155,7 +155,7 @@ class program
                 foreach (var order in orders)
                 {
                     writer.WriteLine($"Order PO: {order.PO}");
-                    writer.WriteLine($"Manufacturer Name: {order.manufacturerName}");
+                    writer.WriteLine($"Manufacturer Name: {order.ManufacturerName}");
                     writer.WriteLine("Items:");
                     foreach (var item in order.Items)
                     {
