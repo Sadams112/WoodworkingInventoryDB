@@ -54,6 +54,10 @@ class program
                         case "2":
                             SearchOrders(context);
                             break;
+                        
+                        case "3":
+                            SaveOrdersToFile(context.Orders, "Orders.txt");
+                            break;
                             
                 }
             }
