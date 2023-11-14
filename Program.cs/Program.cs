@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Program.cs;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 class program
 {
