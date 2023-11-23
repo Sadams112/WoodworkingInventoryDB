@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using Program.cs;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 class program
 {
     static void Main()
     {
+        
+        
         using (var context = new OrderDbContext())
         {
             context.Database.EnsureCreated();
@@ -29,26 +33,7 @@ class program
                 switch (choice)
                 {
                     case "1":
-                        Console.WriteLine(" What is the category? ");
-                        string category = Console.ReadLine();
-                        
-                        Console.WriteLine(" What is the PO ");
-                        int PO = Console.Read();
-
-                        Console.WriteLine(" What is the order date? ");
-                        string date = Console.ReadLine();
-                        
-                        Console.WriteLine(" What is the Size? ");
-                        string size = Console.ReadLine();
-                        
-                        Console.WriteLine(" What is the Color? ");
-                        string Color = Console.ReadLine();
-                        
-                        Console.WriteLine(" Who is the Manufacturer? ");
-                        string Manufacturer = Console.ReadLine();
-                        
-                        Console.WriteLine(" What is the Quantity? ");
-                        string Quantity = Console.ReadLine();
+                        AddOrder(context);
                         
                         break;
                         
@@ -60,6 +45,17 @@ class program
                             SaveOrdersToFile(context.Orders, "Orders.txt");
                             break;
                             
+                        case "4":
+                             
+                            Console.WriteLine("Exiting the program. Goodbye!");
+                            
+                            Environment.Exit(0); // Terminate the program with exit code 0
+                            break;
+                        default:
+                            Console.WriteLine("Invalid choice. Please enter a number between 1 and 4.");
+                            break;
+                        
+                        
                 }
             }
         }
@@ -117,6 +113,66 @@ class program
 
     }
 
+    
+    static void AddOrder(OrderDbContext context)
+    {
+        Console.Write("Enter manufacturer: ");
+        string manufacturerName = Console.ReadLine();
+
+        DateTime orderDate;
+        while (true)
+        {
+            Console.Write("Enter order date (YYYY-MM-DD): ");
+            if (DateTime.TryParseExact(Console.ReadLine(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out orderDate))
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Invalid date format. Please enter the date in the format YYYY-MM-DD.");
+            }
+        }
+
+        Console.Write("Enter size: ");
+        string size = Console.ReadLine();
+
+        Console.Write("Enter color: ");
+        string color = Console.ReadLine();
+
+        int quantity;
+        while (true)
+        {
+            Console.Write("Enter quantity: ");
+            if (int.TryParse(Console.ReadLine(), out quantity) && quantity > 0)
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Invalid quantity. Please enter a positive integer.");
+            }
+        }
+
+        // Create an instance of the Order entity with the provided values
+        var order = new Order
+        {
+            ManufacturerName = manufacturerName,
+            OrderDate = orderDate,
+            Size = size,
+            Color = color,
+            Quantity = quantity
+        };
+
+        // Add the order to the Orders DbSet
+        context.Orders.Add(order);
+
+        // Save changes to the database
+        context.SaveChanges();
+
+        Console.WriteLine("Order added successfully!");
+    }
+
+    
     
 
     static void DisplayOrders(IEnumerable<Order> orders)

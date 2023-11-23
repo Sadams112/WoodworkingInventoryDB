@@ -14,14 +14,15 @@ public class OrderDbContext : DbContext
         // Configure the database connection here.
         // For example, using SQLite with a file-based database:
         optionsBuilder.UseSqlite("Data Source=orders.db");
-
-        // Call SetProvider to configure SQLitePCL.raw
-        SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
+        modelBuilder.Entity<Order>()
+            .HasKey(o => o.PO);
+
+        modelBuilder.Entity<OrderItem>()
+            .HasKey(oi => oi.PO); 
     }
 }
 
