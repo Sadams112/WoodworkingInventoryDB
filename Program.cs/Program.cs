@@ -200,24 +200,29 @@ class program
             Console.WriteLine(" Search Results: ");
             foreach (var order in orders)
             {
-                Console.WriteLine($"OrderPO: {order.PO}");
+                Console.WriteLine($"Order PO: {order.PO}");
                 Console.WriteLine($"Job Name: {order.JobName}");
-                Console.WriteLine($"Items:");
+                Console.WriteLine($"Manufacturer Name: {order.ManufacturerName}");
+                Console.WriteLine($"Order Date: {order.OrderDate.ToString("yyyy-MM-dd")}");
+                Console.WriteLine($"Size: {order.Size}");
+                Console.WriteLine($"Color: {order.Color}");
+                Console.WriteLine($"Quantity: {order.Quantity}");
+                Console.WriteLine("Items:");
 
-                if (order.Items == null)
+                if (order.Items == null || !order.Items.Any())
                 {
-                    Console.WriteLine("No order items found ");
-                    return;
+                    Console.WriteLine("No order items found");
+                }
+                else
+                {
+                    foreach (var item in order.Items)
+                    {
+                        Console.WriteLine($"  Category: {item.Category}");
+                        Console.WriteLine($"  Description: {item.Description}");
+                        Console.WriteLine($"  Quantity: {item.Quantity}");
+                    }
                 }
 
-                foreach (var item in order.Items)
-                    
-                {
-                    Console.WriteLine($" Category: {item.Category}");
-                    Console.WriteLine($" Description: {item.Description}");
-                    Console.WriteLine($" Quantity: {item.Quantity}");
-                    
-                }
                 Console.WriteLine();
             }
         }
@@ -226,7 +231,7 @@ class program
             Console.WriteLine(" No matching orders found. ");
         }
     }
-    
+
     static void SaveOrdersToFile(IEnumerable<Order> orders, string filePath)
     {
         try
