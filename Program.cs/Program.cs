@@ -15,7 +15,7 @@ class program
         
         using (var context = new OrderDbContext())
         {
-            context.Database.EnsureCreated();
+           
 
             bool exit = false;
 
@@ -116,6 +116,17 @@ class program
     
     static void AddOrder(OrderDbContext context)
     {
+
+        Console.Write("Enter the PO: ");
+        int PO;
+        while (!int.TryParse(Console.ReadLine(), out PO))
+        {
+            Console.WriteLine("Invalid PO. Please enter a valid integer.");
+            Console.Write("Enter the PO: ");
+        }
+
+        
+
         Console.Write("Enter manufacturer: ");
         string manufacturerName = Console.ReadLine();
 
@@ -133,6 +144,11 @@ class program
             }
         }
 
+       
+        
+        Console.Write("Enter the job name: ");
+        string jobName = Console.ReadLine();
+        
         Console.Write("Enter size: ");
         string size = Console.ReadLine();
 
@@ -156,6 +172,8 @@ class program
         // Create an instance of the Order entity with the provided values
         var order = new Order
         {
+            PO = PO,
+            JobName = jobName,
             ManufacturerName = manufacturerName,
             OrderDate = orderDate,
             Size = size,
@@ -185,6 +203,12 @@ class program
                 Console.WriteLine($"OrderPO: {order.PO}");
                 Console.WriteLine($"Job Name: {order.JobName}");
                 Console.WriteLine($"Items:");
+
+                if (order.Items == null)
+                {
+                    Console.WriteLine("No order items found ");
+                    return;
+                }
 
                 foreach (var item in order.Items)
                     

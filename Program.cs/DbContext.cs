@@ -9,10 +9,11 @@ public class OrderDbContext : DbContext
 {
     public DbSet<Order> Orders { get; set; }
 
+    
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // Configure the database connection here.
-        // For example, using SQLite with a file-based database:
+        
         optionsBuilder.UseSqlite("Data Source=orders.db");
     }
 
