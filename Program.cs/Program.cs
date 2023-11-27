@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 
 class program
 {
-    static void Main()
+    static async Task Main()
     {
         
         
@@ -33,12 +33,12 @@ class program
                 switch (choice)
                 {
                     case "1":
-                        AddOrder(context);
+                        await AddOrderAsync(context);
                         
                         break;
                         
                         case "2":
-                            SearchOrders(context);
+                            await SearchOrdersAsync(context);
                             break;
                         
                         case "3":
@@ -63,7 +63,7 @@ class program
 
 
 
-    static void SearchOrders(OrderDbContext context)
+    static async Task SearchOrdersAsync(OrderDbContext context)
     {
         bool searchExit = false;
 
@@ -83,9 +83,9 @@ class program
                     Console.Write("Enter manufacturer name to search for: ");
                     string manufacturerName = Console.ReadLine();
 
-                    var ordersByManufacturer = context.Orders
+                    var ordersByManufacturer = await context.Orders
                         .Where(order => order.ManufacturerName.Contains(manufacturerName))
-                        .ToList();  // Using ToList to materialize the results
+                        .ToListAsync();  // Using ToList to materialize the results
 
                     DisplayOrders(ordersByManufacturer);
                     break;
@@ -114,7 +114,7 @@ class program
     }
 
     
-    static void AddOrder(OrderDbContext context)
+    static async Task AddOrderAsync(OrderDbContext context)
     {
 
         Console.Write("Enter the PO: ");
@@ -185,7 +185,7 @@ class program
         context.Orders.Add(order);
 
         // Save changes to the database
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         Console.WriteLine("Order added successfully!");
     }
