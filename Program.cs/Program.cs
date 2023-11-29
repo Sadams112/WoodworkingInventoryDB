@@ -24,8 +24,10 @@ class program
 
             while (!exit)
             {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Cabinet Company Order Tracker");
-                Console.WriteLine(" .1 Add orders ");
+                Console.WriteLine(" 1. Add orders ");
                 Console.WriteLine(" 2. Search for an order ");
                 Console.WriteLine(" 3. Save order to text file ");
                 Console.WriteLine(" 4. Exit the Program ");
@@ -49,13 +51,18 @@ class program
                             break;
                             
                         case "4":
-                             
+                            Console.ForegroundColor = ConsoleColor.Red; 
                             Console.WriteLine("Exiting the program. Goodbye!");
                             
                             Environment.Exit(0); 
+                            await Task.Delay(2000); // 2000 milliseconds (2 seconds)
+                            Environment.Exit(0);
+                            
                             break;
                         default:
                             Console.WriteLine("Invalid choice. Please enter a number between 1 and 4.");
+                          
+                            
                             break;
                         
                         
@@ -72,6 +79,7 @@ class program
 
     while (!searchExit)
     {
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("Search Orders");
         Console.WriteLine("1. Search by manufacturer name ");
         Console.WriteLine("2. Search by item Category ");
@@ -84,6 +92,7 @@ class program
         switch (searchChoice)
         {
             case "1":
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter manufacturer name to search for: ");
                 string manufacturerName = Console.ReadLine();
 
@@ -96,6 +105,7 @@ class program
                 break;
 
             case "2":
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter item category to search for (e.g., Laminate, Hardware, Board, etc.): ");
                 string itemCategory = Console.ReadLine();
 
@@ -108,6 +118,7 @@ class program
                 break;
 
             case "3":
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter PO to search for: ");
                 int searchPO;
                 while (!int.TryParse(Console.ReadLine(), out searchPO))
@@ -125,6 +136,7 @@ class program
                 break;
 
             case "4":
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter color to search for: ");
                 string searchColor = Console.ReadLine();
 
@@ -141,6 +153,7 @@ class program
                 break;
 
             default:
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Invalid choice. Please try again.");
                 break;
         }
@@ -150,6 +163,7 @@ class program
     
     static async Task AddOrderAsync(OrderDbContext context)
 {
+    Console.ForegroundColor = ConsoleColor.Cyan;
     Console.Write("Enter the PO: ");
     int PO;
     while (!int.TryParse(Console.ReadLine(), out PO))
@@ -171,6 +185,7 @@ class program
         }
         else
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Invalid date format. Please enter the date in the format YYYY-MM-DD.");
         }
     }
@@ -236,6 +251,8 @@ class program
     await context.SaveChangesAsync();
 
     Console.WriteLine("Order added successfully!");
+    
+    await Task.Delay(2000); 
 }
 
 
@@ -246,6 +263,7 @@ class program
     {
         if (orders.Any())
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(" Search Results: ");
             foreach (var order in orders)
             {
@@ -260,6 +278,7 @@ class program
 
                 if (order.Items == null || !order.Items.Any())
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("No order items found");
                 }
                 else
@@ -277,6 +296,7 @@ class program
         }
         else
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" No matching orders found. ");
         }
     }
@@ -302,10 +322,13 @@ class program
                 }
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
+
             Console.WriteLine($"Orders successfully saved to {filePath}");
         }
         catch (Exception ex)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Error saving orders to file: {ex.Message}");
         }
     }
