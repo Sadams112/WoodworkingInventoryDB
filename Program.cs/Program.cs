@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using Program.cs;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -12,8 +13,10 @@ class program
     static async Task Main()
     {
         
-        
-        using (var context = new OrderDbContext())
+       
+
+        var dbPath= GetDatabasePath();
+        using (var context = new OrderDbContext(dbPath))
         {
            
 
@@ -49,7 +52,7 @@ class program
                              
                             Console.WriteLine("Exiting the program. Goodbye!");
                             
-                            Environment.Exit(0); // Terminate the program with exit code 0
+                            Environment.Exit(0); 
                             break;
                         default:
                             Console.WriteLine("Invalid choice. Please enter a number between 1 and 4.");
@@ -64,131 +67,177 @@ class program
 
 
     static async Task SearchOrdersAsync(OrderDbContext context)
+{
+    bool searchExit = false;
+
+    while (!searchExit)
     {
-        bool searchExit = false;
+        Console.WriteLine("Search Orders");
+        Console.WriteLine("1. Search by manufacturer name ");
+        Console.WriteLine("2. Search by item Category ");
+        Console.WriteLine("3. Search by PO ");
+        Console.WriteLine("4. Search by Color ");
+        Console.WriteLine("5. Back to main menu ");
+        Console.Write("Enter your Choice: ");
+        string searchChoice = Console.ReadLine();
 
-        while (!searchExit)
+        switch (searchChoice)
         {
-            Console.WriteLine("Search Orders");
-            Console.WriteLine("1. Search by manufacturer name ");
-            Console.WriteLine("2. Search by item Category ");
-            Console.WriteLine("3. Back to main menu ");
-            Console.Write("Enter your Choice: ");
-            string searchChoice = Console.ReadLine();
+            case "1":
+                Console.Write("Enter manufacturer name to search for: ");
+                string manufacturerName = Console.ReadLine();
 
+                var ordersByManufacturer = await context.Orders
+                    .Where(order => order.ManufacturerName.Contains(manufacturerName))
+                    .Include(order => order.Items)
+                    .ToListAsync();
 
-            switch (searchChoice)
-            {
-                case "1":
-                    Console.Write("Enter manufacturer name to search for: ");
-                    string manufacturerName = Console.ReadLine();
+                DisplayOrders(ordersByManufacturer);
+                break;
 
-                    var ordersByManufacturer = await context.Orders
-                        .Where(order => order.ManufacturerName.Contains(manufacturerName))
-                        .ToListAsync();  // Using ToList to materialize the results
+            case "2":
+                Console.Write("Enter item category to search for (e.g., Laminate, Hardware, Board, etc.): ");
+                string itemCategory = Console.ReadLine();
 
-                    DisplayOrders(ordersByManufacturer);
-                    break;
-                
-                case "2":
-                    Console.Write("Enter item category to search for (e.g., Laminate, Hardware, Board, etc.): ");
-                    string itemCategory = Console.ReadLine();
+                var ordersByCategory = await context.Orders
+                    .Where(order => order.Items.Any(item => item.Category == itemCategory))
+                    .Include(order => order.Items)
+                    .ToListAsync();
 
-                    var ordersByCategory = context.Orders
-                        .Where(order => order.Items.Any(item => item.Category == itemCategory))
-                        .ToList();  // Using ToList to materialize the results
+                DisplayOrders(ordersByCategory);
+                break;
 
-                    DisplayOrders(ordersByCategory);
-                    break;
+            case "3":
+                Console.Write("Enter PO to search for: ");
+                int searchPO;
+                while (!int.TryParse(Console.ReadLine(), out searchPO))
+                {
+                    Console.WriteLine("Invalid PO. Please enter a valid integer.");
+                    Console.Write("Enter PO to search for: ");
+                }
 
-                case "3":
-                    searchExit = true;
-                    break;
+                var ordersByPO = await context.Orders
+                    .Where(order => order.PO == searchPO)
+                    .Include(order => order.Items)
+                    .ToListAsync();
 
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
-            }
+                DisplayOrders(ordersByPO);
+                break;
+
+            case "4":
+                Console.Write("Enter color to search for: ");
+                string searchColor = Console.ReadLine();
+
+                var ordersByColor = await context.Orders
+                    .Where(order => order.Color.Contains(searchColor))
+                    .Include(order => order.Items)
+                    .ToListAsync();
+
+                DisplayOrders(ordersByColor);
+                break;
+
+            case "5":
+                searchExit = true;
+                break;
+
+            default:
+                Console.WriteLine("Invalid choice. Please try again.");
+                break;
         }
-
     }
+}
 
     
     static async Task AddOrderAsync(OrderDbContext context)
+{
+    Console.Write("Enter the PO: ");
+    int PO;
+    while (!int.TryParse(Console.ReadLine(), out PO))
     {
-
+        Console.WriteLine("Invalid PO. Please enter a valid integer.");
         Console.Write("Enter the PO: ");
-        int PO;
-        while (!int.TryParse(Console.ReadLine(), out PO))
-        {
-            Console.WriteLine("Invalid PO. Please enter a valid integer.");
-            Console.Write("Enter the PO: ");
-        }
-
-        
-
-        Console.Write("Enter manufacturer: ");
-        string manufacturerName = Console.ReadLine();
-
-        DateTime orderDate;
-        while (true)
-        {
-            Console.Write("Enter order date (YYYY-MM-DD): ");
-            if (DateTime.TryParseExact(Console.ReadLine(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out orderDate))
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid date format. Please enter the date in the format YYYY-MM-DD.");
-            }
-        }
-
-       
-        
-        Console.Write("Enter the job name: ");
-        string jobName = Console.ReadLine();
-        
-        Console.Write("Enter size: ");
-        string size = Console.ReadLine();
-
-        Console.Write("Enter color: ");
-        string color = Console.ReadLine();
-
-        int quantity;
-        while (true)
-        {
-            Console.Write("Enter quantity: ");
-            if (int.TryParse(Console.ReadLine(), out quantity) && quantity > 0)
-            {
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid quantity. Please enter a positive integer.");
-            }
-        }
-
-        // Create an instance of the Order entity with the provided values
-        var order = new Order
-        {
-            PO = PO,
-            JobName = jobName,
-            ManufacturerName = manufacturerName,
-            OrderDate = orderDate,
-            Size = size,
-            Color = color,
-            Quantity = quantity
-        };
-
-        // Add the order to the Orders DbSet
-        context.Orders.Add(order);
-
-        // Save changes to the database
-        await context.SaveChangesAsync();
-
-        Console.WriteLine("Order added successfully!");
     }
+
+    Console.Write("Enter manufacturer: ");
+    string manufacturerName = Console.ReadLine();
+
+    DateTime orderDate;
+    while (true)
+    {
+        Console.Write("Enter order date (YYYY-MM-DD): ");
+        if (DateTime.TryParseExact(Console.ReadLine(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out orderDate))
+        {
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid date format. Please enter the date in the format YYYY-MM-DD.");
+        }
+    }
+
+    Console.Write("Enter the job name: ");
+    string jobName = Console.ReadLine();
+
+    Console.Write("Enter size: ");
+    string size = Console.ReadLine();
+
+    Console.Write("Enter color: ");
+    string color = Console.ReadLine();
+
+    int quantity;
+    while (true)
+    {
+        Console.Write("Enter quantity: ");
+        if (int.TryParse(Console.ReadLine(), out quantity) && quantity > 0)
+        {
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid quantity. Please enter a positive integer.");
+        }
+    }
+
+    // Create an instance of the Order entity with the provided values
+    var order = new Order
+    {
+        PO = PO,
+        JobName = jobName,
+        ManufacturerName = manufacturerName,
+        OrderDate = orderDate,
+        Size = size,
+        Color = color,
+        Quantity = quantity,
+        Items = new List<OrderItem>() // Initialize the Items collection
+    };
+
+    // Prompt user for OrderItem information
+    Console.Write("Enter item category: ");
+    string category = Console.ReadLine();
+
+    Console.Write("Enter item description: ");
+    string description = Console.ReadLine();
+
+    // Create an instance of the OrderItem entity with the provided values
+    var orderItem = new OrderItem
+    {
+        Category = category,
+        Description = description,
+        Quantity = quantity // Assuming the quantity for the item is the same as the order quantity
+    };
+
+    // Add the order item to the Items collection
+    order.Items.Add(orderItem);
+
+    // Add the order to the Orders DbSet
+    context.Orders.Add(order);
+
+    // Save changes to the database
+    await context.SaveChangesAsync();
+
+    Console.WriteLine("Order added successfully!");
+}
+
 
     
     
@@ -261,6 +310,29 @@ class program
         }
     }
 
+    
+    private static string GetDatabasePath()
+    { 
+        var solutionDirectory = Environment.CurrentDirectory;
+        
+        var dbPath = Path.Combine(Environment.CurrentDirectory, "orders.db");
+        while (!solutionDirectory.EndsWith("Program.cs"))
+        {
+            
+            
+            solutionDirectory = Directory.GetParent(solutionDirectory).FullName;
+        
+            dbPath = Path.Combine(solutionDirectory, "orders.db");
+            
+            
+        }
+        
+        Console.WriteLine(dbPath);
+
+        return dbPath;
+    }
+    
+    
 }
 
 

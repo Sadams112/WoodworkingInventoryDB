@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class OrderDbContext : DbContext
 {
+    private string dbPath;
+    
+    
     public DbSet<Order> Orders { get; set; }
 
     
@@ -14,7 +17,7 @@ public class OrderDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         
-        optionsBuilder.UseSqlite("Data Source=orders.db");
+        optionsBuilder.UseSqlite($"Data Source={this.dbPath}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,6 +27,11 @@ public class OrderDbContext : DbContext
 
         modelBuilder.Entity<OrderItem>()
             .HasKey(oi => oi.PO); 
+    }
+
+    public OrderDbContext(string dbPath)
+    {
+        this.dbPath = dbPath;
     }
 }
 
