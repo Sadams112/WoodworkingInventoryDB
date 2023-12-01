@@ -13,9 +13,17 @@ class program
     static async Task Main()
     {
         
-       
+        var solutionDirectoryPath = GetSolutionPath();
+        var dbPath = Path.Combine(solutionDirectoryPath, "orders.db");
+        var filePath = Path.Combine(solutionDirectoryPath, "orders.txt");
+        
+        
+        
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Cabinet Company Order Tracker");
+        Console.WriteLine("----------------------------");
 
-        var dbPath= GetDatabasePath();
+        
         using (var context = new OrderDbContext(dbPath))
         {
            
@@ -24,9 +32,8 @@ class program
 
             while (!exit)
             {
-                Console.Clear();
+                
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("Cabinet Company Order Tracker");
                 Console.WriteLine(" 1. Add orders ");
                 Console.WriteLine(" 2. Search for an order ");
                 Console.WriteLine(" 3. Save order to text file ");
@@ -47,7 +54,7 @@ class program
                             break;
                         
                         case "3":
-                            SaveOrdersToFile(context.Orders, "Orders.txt");
+                            SaveOrdersToFile(context.Orders, filePath);
                             break;
                             
                         case "4":
@@ -55,7 +62,7 @@ class program
                             Console.WriteLine("Exiting the program. Goodbye!");
                             
                             Environment.Exit(0); 
-                            await Task.Delay(2000); // 2000 milliseconds (2 seconds)
+                            await Task.Delay(2000); 
                             Environment.Exit(0);
                             
                             break;
@@ -87,17 +94,17 @@ class program
         Console.WriteLine("4. Search by Color ");
         Console.WriteLine("5. Back to main menu ");
         Console.Write("Enter your Choice: ");
-        string searchChoice = Console.ReadLine();
+        string searchChoice = Console.ReadLine()?.ToLower(); 
 
         switch (searchChoice)
         {
             case "1":
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter manufacturer name to search for: ");
-                string manufacturerName = Console.ReadLine();
+                string manufacturerName = Console.ReadLine()?.ToLower(); 
 
                 var ordersByManufacturer = await context.Orders
-                    .Where(order => order.ManufacturerName.Contains(manufacturerName))
+                    .Where(order => order.ManufacturerName.ToLower().Contains(manufacturerName))
                     .Include(order => order.Items)
                     .ToListAsync();
 
@@ -107,10 +114,10 @@ class program
             case "2":
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter item category to search for (e.g., Laminate, Hardware, Board, etc.): ");
-                string itemCategory = Console.ReadLine();
+                string itemCategory = Console.ReadLine()?.ToLower(); // Convert user input to lowercase
 
                 var ordersByCategory = await context.Orders
-                    .Where(order => order.Items.Any(item => item.Category == itemCategory))
+                    .Where(order => order.Items.Any(item => item.Category.ToLower() == itemCategory))
                     .Include(order => order.Items)
                     .ToListAsync();
 
@@ -138,10 +145,10 @@ class program
             case "4":
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("Enter color to search for: ");
-                string searchColor = Console.ReadLine();
+                string searchColor = Console.ReadLine()?.ToLower(); 
 
                 var ordersByColor = await context.Orders
-                    .Where(order => order.Color.Contains(searchColor))
+                    .Where(order => order.Color.ToLower().Contains(searchColor))
                     .Include(order => order.Items)
                     .ToListAsync();
 
@@ -160,6 +167,7 @@ class program
     }
 }
 
+
     
     static async Task AddOrderAsync(OrderDbContext context)
 {
@@ -170,7 +178,19 @@ class program
     {
         Console.WriteLine("Invalid PO. Please enter a valid integer.");
         Console.Write("Enter the PO: ");
+        
     }
+
+    var existingOrder = await context.Orders.AnyAsync(order1 => order1.PO == PO);
+
+    if (existingOrder)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"Order already exist with PO {PO} ");
+        return;
+    }
+
+    
 
     Console.Write("Enter manufacturer: ");
     string manufacturerName = Console.ReadLine();
@@ -178,6 +198,7 @@ class program
     DateTime orderDate;
     while (true)
     {
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.Write("Enter order date (YYYY-MM-DD): ");
         if (DateTime.TryParseExact(Console.ReadLine(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out orderDate))
         {
@@ -190,6 +211,7 @@ class program
         }
     }
 
+    Console.ForegroundColor = ConsoleColor.Cyan;
     Console.Write("Enter the job name: ");
     string jobName = Console.ReadLine();
 
@@ -213,7 +235,7 @@ class program
         }
     }
 
-    // Create an instance of the Order entity with the provided values
+    
     var order = new Order
     {
         PO = PO,
@@ -223,31 +245,31 @@ class program
         Size = size,
         Color = color,
         Quantity = quantity,
-        Items = new List<OrderItem>() // Initialize the Items collection
+        Items = new List<OrderItem>() 
     };
 
-    // Prompt user for OrderItem information
+  
     Console.Write("Enter item category: ");
     string category = Console.ReadLine();
 
     Console.Write("Enter item description: ");
     string description = Console.ReadLine();
 
-    // Create an instance of the OrderItem entity with the provided values
+    
     var orderItem = new OrderItem
     {
         Category = category,
         Description = description,
-        Quantity = quantity // Assuming the quantity for the item is the same as the order quantity
+        Quantity = quantity 
     };
 
-    // Add the order item to the Items collection
+   
     order.Items.Add(orderItem);
 
-    // Add the order to the Orders DbSet
+    
     context.Orders.Add(order);
 
-    // Save changes to the database
+  
     await context.SaveChangesAsync();
 
     Console.WriteLine("Order added successfully!");
@@ -311,19 +333,31 @@ class program
                 {
                     writer.WriteLine($"Order PO: {order.PO}");
                     writer.WriteLine($"Manufacturer Name: {order.ManufacturerName}");
+                    writer.WriteLine($"Order Date: {order.OrderDate.ToString("yyyy-MM-dd")}");
+                    writer.WriteLine($"Size: {order.Size}");
+                    writer.WriteLine($"Color: {order.Color}");
+                    writer.WriteLine($"Quantity: {order.Quantity}");
                     writer.WriteLine("Items:");
-                    foreach (var item in order.Items)
+
+                    if (order.Items != null)
                     {
-                        writer.WriteLine($"  Category: {item.Category}");
-                        writer.WriteLine($"  Description: {item.Description}");
-                        writer.WriteLine($"  Quantity: {item.Quantity}");
+                        foreach (var item in order.Items)
+                        {
+                            writer.WriteLine($"  Category: {item.Category}");
+                            writer.WriteLine($"  Description: {item.Description}");
+                            writer.WriteLine($"  Quantity: {item.Quantity}");
+                        }
                     }
+                    else
+                    {
+                        writer.WriteLine("No items found");
+                    }
+
                     writer.WriteLine();
                 }
             }
 
             Console.ForegroundColor = ConsoleColor.Green;
-
             Console.WriteLine($"Orders successfully saved to {filePath}");
         }
         catch (Exception ex)
@@ -331,28 +365,31 @@ class program
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Error saving orders to file: {ex.Message}");
         }
+        finally
+        {
+            Console.ResetColor(); 
+        }
     }
 
+
     
-    private static string GetDatabasePath()
+    private static string GetSolutionPath()
     { 
         var solutionDirectory = Environment.CurrentDirectory;
         
-        var dbPath = Path.Combine(Environment.CurrentDirectory, "orders.db");
+       
         while (!solutionDirectory.EndsWith("Program.cs"))
         {
             
             
             solutionDirectory = Directory.GetParent(solutionDirectory).FullName;
-        
-            dbPath = Path.Combine(solutionDirectory, "orders.db");
             
             
         }
         
-        Console.WriteLine(dbPath);
+        Console.WriteLine(solutionDirectory);
 
-        return dbPath;
+        return solutionDirectory;
     }
     
     
