@@ -20,7 +20,7 @@ class program
         
         
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Cabinet Company Order Tracker");
+        Console.WriteLine("Woodworking order tracker ");
         Console.WriteLine("----------------------------");
 
         
