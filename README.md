@@ -5,7 +5,7 @@ This is a Conosle Application to help keep track of orders and materials needed 
 
 
 
-#Instructions. To use this application you can run it on the console or using your favorite IDE. To run on console navigate to the correct folder where the project is stored on your pc and use the command "dotnet run". If using an IDE just run the program like you normally would by building and then running the solution. The main menu will have your options to add orders, search for orders, save to a text file, and exit the program. Type in the integer of what function you want to use from the menu. I have pre loaded some data to the database. Search by category and then enter Laminate, Board, or Hardware to go through the pre loaded orders. When saving to text file the program will tell you where the file is saved EX. Orders.txt.
+#Instructions. To use this application you can run it on the console or using your favorite IDE. To run on console navigate to the folder containing cs.proj and use the command "dotnet run". If using an IDE just run the program like you normally would by building and then running the solution. The main menu will have your options to add orders, search for orders, save to a text file, and exit the program. Type in the integer of what function you want to use from the menu. I have pre loaded some data to the database. Search by category and then enter Laminate, Board, or Hardware to go through the pre loaded orders. When saving to text file the program will tell you where the file is saved EX. Orders.txt.
 
 
 
