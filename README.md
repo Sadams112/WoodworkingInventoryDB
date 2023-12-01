@@ -1,7 +1,7 @@
 Final Project for Code You 2023
 
 
-This is a Conosle Application to help keep track of orders and materials needed when woodworking. The application allows you to add, search, and save orders. All of the data is stored on a SQLite database, and can be pulled from said database when using the search function.
+This is a Conosle Application to help keep track of orders and materials needed when woodworking. The application allows you to add, search, and save orders. All of the data is stored on a SQLite database, and can be pulled from said database when using the search or save to text file function.
 
 
 
